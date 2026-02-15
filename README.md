@@ -1,8 +1,6 @@
+
 # finops-cost-governance-dashboard
 Executive FinOps dashboard for cost visibility, anomaly detection, and governance in data platforms.
-# finops-cost-governance-dashboard
-Executive FinOps dashboard for cost visibility, anomaly detection, and governance in data platforms.
-# FinOps Cost Governance Dashboard
 ![Dashboard Preview](dashboard_preview.png)
 **Live Demo:** https://lakshmianandacoumar.github.io/finops-cost-governance-dashboard/
 
