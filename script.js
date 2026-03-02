@@ -5,18 +5,23 @@ document.getElementById("year").textContent = new Date().getFullYear();
 const hamburger = document.getElementById("hamburger");
 const mobileNav = document.getElementById("mobileNav");
 
+function setMobileOpen(isOpen) {
+  mobileNav.style.display = isOpen ? "block" : "none";
+  if (hamburger) hamburger.setAttribute("aria-expanded", String(isOpen));
+}
+
 hamburger?.addEventListener("click", () => {
   const isOpen = mobileNav.style.display === "block";
-  mobileNav.style.display = isOpen ? "none" : "block";
+  setMobileOpen(!isOpen);
 });
 
 // Close mobile nav after click
 document.querySelectorAll(".mobile-link").forEach((a) => {
-  a.addEventListener("click", () => (mobileNav.style.display = "none"));
+  a.addEventListener("click", () => setMobileOpen(false));
 });
 
 // Active nav link on scroll
-const sections = ["home", "about", "experience", "projects", "contact"]
+const sections = ["home", "about", "agents", "experience", "projects", "munnetra", "contact"]
   .map((id) => document.getElementById(id))
   .filter(Boolean);
 

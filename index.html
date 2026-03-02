@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Lakshmi Anandacoumar | Portfolio</title>
-  <meta name="description" content="Portfolio of Lakshmi Anandacoumar — Data Platform & Product Leader (FinOps, Governance, Retail Analytics, GenAI Agents)." />
+  <meta name="description" content="Portfolio of Lakshmi Anandacoumar — AI-First Data Platform & Product Leader (Agentic systems, FinOps, Governance, Retail Analytics, Tutor Agents)." />
   <link rel="stylesheet" href="styles.css" />
 </head>
 
@@ -14,25 +14,29 @@
     <div class="container topbar-inner">
       <div class="brand">LAKSHMI ANANDACOUMAR</div>
 
-      <nav class="nav">
+      <nav class="nav" aria-label="Primary">
         <a href="#home" class="nav-link active">HOME</a>
         <a href="#about" class="nav-link">ABOUT</a>
+        <a href="#agents" class="nav-link">AI AGENTS</a>
         <a href="#experience" class="nav-link">EXPERIENCE</a>
         <a href="#projects" class="nav-link">PROJECTS</a>
+        <a href="#munnetra" class="nav-link">MUNNETRA PADHAI</a>
         <a href="#contact" class="nav-link">CONTACT</a>
       </nav>
 
-      <button class="hamburger" id="hamburger" aria-label="Open menu">
+      <button class="hamburger" id="hamburger" aria-label="Open menu" aria-controls="mobileNav" aria-expanded="false">
         <span></span><span></span><span></span>
       </button>
     </div>
 
     <!-- Mobile menu -->
-    <div class="mobile-nav" id="mobileNav">
+    <div class="mobile-nav" id="mobileNav" aria-label="Mobile">
       <a href="#home" class="mobile-link">HOME</a>
       <a href="#about" class="mobile-link">ABOUT</a>
+      <a href="#agents" class="mobile-link">AI AGENTS</a>
       <a href="#experience" class="mobile-link">EXPERIENCE</a>
       <a href="#projects" class="mobile-link">PROJECTS</a>
+      <a href="#munnetra" class="mobile-link">MUNNETRA PADHAI</a>
       <a href="#contact" class="mobile-link">CONTACT</a>
     </div>
   </header>
@@ -42,23 +46,27 @@
     <div class="container hero-grid">
       <div class="hero-left">
         <div class="eyebrow">PORTFOLIO</div>
-        <h1 class="hero-title">Data Platform & Product Leader</h1>
+        <h1 class="hero-title">AI-First Data Platform & Product Leader</h1>
+
         <p class="hero-subtitle">
-          FinOps governance, cost visibility, and scalable standardized data solutions — powered by <span class="em">AI agents</span>.
-          I build agent-driven products that detect waste, explain drivers, and recommend actions with guardrails (dashboards are the executive view).
+          I design <span class="em">AI-native</span> data platforms and intelligent agents that automate data engineering,
+          FinOps governance, and decision intelligence.
+          <span class="hero-break"></span>
+          I also build <span class="em">AI Tutor Agents</span> through <span class="em">Munnetra Padhai</span>, a non-profit initiative supporting
+          economically disadvantaged students with practical learning and portfolio outcomes.
         </p>
 
         <div class="hero-cta">
-          <a class="btn primary" href="#projects">View AI Agents</a>
+          <a class="btn primary" href="#agents">Explore AI Agents</a>
           <a class="btn ghost" href="#contact">Contact</a>
         </div>
 
         <div class="chips">
-          <span class="chip">FinOps Governance Agent</span>
-          <span class="chip">Cost Anomaly Detection</span>
+          <span class="chip">Agentic Systems</span>
+          <span class="chip">FinOps Intelligence</span>
           <span class="chip">Databricks / Lakehouse</span>
-          <span class="chip">Agentic Enablement</span>
           <span class="chip">Telemetry & KPIs</span>
+          <span class="chip">AI Tutor Agents</span>
         </div>
       </div>
 
@@ -66,8 +74,9 @@
         <div class="glass-card">
           <div class="card-eyebrow">FEATURED</div>
           <div class="card-title">FinOps Governance Agent</div>
+
           <div class="card-text">
-            Detects cost anomalies, flags untagged assets, explains drivers, and recommends actions.
+            Detects cost anomalies, flags untagged assets, explains drivers, and recommends actions with guardrails.
             The dashboard is the executive view of the agent’s findings.
           </div>
 
@@ -90,7 +99,18 @@
             </div>
           </div>
 
-          <a class="btn small ghost" href="#projects">Explore Agent Suite ↓</a>
+          <div class="callouts">
+            <div class="callout">
+              <div class="callout-k">Enterprise</div>
+              <div class="callout-v">Governance-first automation</div>
+            </div>
+            <div class="callout">
+              <div class="callout-k">Social Impact</div>
+              <div class="callout-v">Tutor agents for learning outcomes</div>
+            </div>
+          </div>
+
+          <a class="btn small ghost" href="#agents">Explore Agent Suite ↓</a>
         </div>
       </div>
     </div>
@@ -100,12 +120,22 @@
   <section id="about" class="section">
     <div class="container">
       <h2 class="section-title">ABOUT</h2>
+
       <div class="two-col">
-        <p class="text">
-          I build governance-first data platforms and AI-enabled products that create accountability,
-          reduce waste, and accelerate decision-making. My work blends product leadership, architecture
-          thinking, and enablement to drive adoption at scale — moving teams from dashboards to <span class="em">decision intelligence</span>.
-        </p>
+        <div>
+          <p class="text">
+            I build governance-first data platforms and AI-enabled products that create accountability,
+            reduce waste, and accelerate decision-making. My work blends product leadership, architecture
+            thinking, and enablement to drive adoption at scale — moving teams from dashboards to
+            <span class="em">decision intelligence</span>.
+          </p>
+
+          <div class="pill-row">
+            <span class="pill">AI-first product strategy</span>
+            <span class="pill">Agentic workflows</span>
+            <span class="pill">Operational excellence</span>
+          </div>
+        </div>
 
         <div class="stat-grid">
           <div class="stat">
@@ -123,6 +153,134 @@
           <div class="stat">
             <div class="stat-k">Style</div>
             <div class="stat-v">Practical + Outcome-led</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- AI AGENTS -->
+  <section id="agents" class="section">
+    <div class="container">
+      <h2 class="section-title">AI AGENTS</h2>
+
+      <div class="section-intro">
+        <p class="text">
+          I build AI agents that turn complex workflows into <span class="em">repeatable systems</span>:
+          clear inputs → governed reasoning → measurable outputs.
+          My portfolio reflects two tracks — <span class="em">Enterprise Agents</span> (platform + FinOps + enablement)
+          and <span class="em">Tutor Agents</span> (Munnetra Padhai).
+        </p>
+      </div>
+
+      <div class="cards">
+        <!-- Enterprise Agents -->
+        <div class="project-card">
+          <div class="row-head">
+            <div>
+              <div class="card-eyebrow">ENTERPRISE AGENTS</div>
+              <div class="card-title">Operational + Governance Intelligence</div>
+            </div>
+            <span class="badge">Enterprise</span>
+          </div>
+
+          <p class="text">
+            Agents designed to improve cost accountability, platform reliability, and engineering productivity
+            with guardrails — combining telemetry signals, rule validation, and recommended actions.
+          </p>
+
+          <div class="agent-grid">
+            <div class="agent">
+              <div class="agent-title">FinOps Governance Agent</div>
+              <div class="agent-text">Detects anomalies, flags untagged assets, explains drivers, recommends actions.</div>
+              <div class="agent-meta">Artifacts: Executive dashboard + GitHub repo</div>
+            </div>
+
+            <div class="agent">
+              <div class="agent-title">Cost Anomaly Detection</div>
+              <div class="agent-text">Identifies waste patterns across jobs, clusters, and storage with explainability.</div>
+              <div class="agent-meta">Signals: long runs, failures, skew, idle cost</div>
+            </div>
+
+            <div class="agent">
+              <div class="agent-title">Telemetry & KPI Agent</div>
+              <div class="agent-text">Builds KPI views from platform telemetry to support operational reviews.</div>
+              <div class="agent-meta">Outcome: faster triage + ownership</div>
+            </div>
+
+            <div class="agent">
+              <div class="agent-title">Data Engineering Copilot</div>
+              <div class="agent-text">Helps generate & document standardized logic patterns with validations.</div>
+              <div class="agent-meta">Outcome: speed + consistency</div>
+            </div>
+          </div>
+
+          <div class="actions">
+            <a class="btn primary" href="#projects">View Featured Demos</a>
+            <a class="btn ghost" href="#contact">Discuss Use Cases</a>
+          </div>
+        </div>
+
+        <!-- Tutor Agents -->
+        <div class="project-card subtle">
+          <div class="row-head">
+            <div>
+              <div class="card-eyebrow">TUTOR AGENTS</div>
+              <div class="card-title">Learning + Portfolio Outcomes</div>
+            </div>
+            <span class="badge impact">Social Impact</span>
+          </div>
+
+          <p class="text">
+            Through <span class="em">Munnetra Padhai</span>, I build tutor agents that help students learn by doing —
+            guided practice, projects, and portfolio-ready artifacts.
+          </p>
+
+          <div class="agent-grid">
+            <div class="agent">
+              <div class="agent-title">SQL Mastery Coach Agent</div>
+              <div class="agent-text">Structured learning with timed practice, projects, and interview role-play.</div>
+              <div class="agent-meta">Outcome: GitHub portfolio + confidence</div>
+            </div>
+
+            <div class="agent">
+              <div class="agent-title">English Communication Coach Agent</div>
+              <div class="agent-text">Simple conversations with gentle corrections and daily fluency drills.</div>
+              <div class="agent-meta">Outcome: speaking confidence</div>
+            </div>
+
+            <div class="agent">
+              <div class="agent-title">AI Basics Tutor</div>
+              <div class="agent-text">Interactive concept learning with small exercises and real-world examples.</div>
+              <div class="agent-meta">Outcome: foundations + curiosity</div>
+            </div>
+
+            <div class="agent">
+              <div class="agent-title">Portfolio Builder Agent</div>
+              <div class="agent-text">Helps students package projects into a clean online portfolio.</div>
+              <div class="agent-meta">Outcome: internships + job readiness</div>
+            </div>
+          </div>
+
+          <div class="actions">
+            <a class="btn ghost" href="#munnetra">See Munnetra Padhai</a>
+            <a class="btn ghost" href="#projects">See Repos</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="cards">
+        <div class="project-card suite">
+          <div class="card-eyebrow">AI SYSTEMS PRINCIPLE</div>
+          <div class="card-title">Agents are products, not demos</div>
+          <p class="text">
+            Each agent is designed as a product: clear problem statement, inputs and guardrails,
+            workflow (signals → reasoning → outputs), and measurable outcomes.
+          </p>
+          <div class="hint">
+            Next step for the portfolio: add 2–3 impact outcomes per agent (e.g., time saved, waste reduced, adoption improved).
           </div>
         </div>
       </div>
@@ -179,6 +337,7 @@
           </div>
 
           <div class="actions">
+            <!-- KEEPING LINKS INTACT -->
             <a class="btn primary" target="_blank" rel="noreferrer"
                href="https://finops-cost-governance-dashboard.vercel.app">Executive View</a>
 
@@ -202,7 +361,8 @@
             <span class="chip">Interview Mode</span>
           </div>
           <div class="actions">
-           <a class="btn ghost" target="_blank" rel="noreferrer" href="https://github.com/Lakshmi-AI-Data/interactive-ai-tutor-agents">GitHub</a>
+            <!-- KEEPING LINKS INTACT -->
+            <a class="btn ghost" target="_blank" rel="noreferrer" href="https://github.com/Lakshmi-AI-Data/interactive-ai-tutor-agents">GitHub</a>
           </div>
         </div>
 
@@ -221,6 +381,7 @@
             <span class="chip">Confidence</span>
           </div>
           <div class="actions">
+            <!-- KEEPING LINKS INTACT -->
             <a class="btn ghost" target="_blank" rel="noreferrer" href="https://github.com/Lakshmi-AI-Data/interactive-ai-tutor-agents/tree/main/English%20AI%20TUTORS">GitHub</a>
           </div>
         </div>
@@ -234,10 +395,69 @@
             Each agent has a clear problem statement, workflow (inputs → signals → outputs), and tangible artifacts (PDFs, demos, repos).
           </p>
           <div class="hint">
-            Next: add 2–3 “impact outcomes” under each agent (time saved, waste reduced, adoption improved).
+            Tip: If you add a short “impact metric” line under each card, it will read even more executive-ready.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MUNNETRA PADHAI -->
+  <section id="munnetra" class="section">
+    <div class="container">
+      <h2 class="section-title">MUNNETRA PADHAI</h2>
+
+      <div class="two-col">
+        <div>
+          <p class="text">
+            Munnetra Padhai is my non-profit initiative supporting economically disadvantaged students.
+            I use AI tutor agents to provide guided learning paths, daily practice, and portfolio outcomes — helping students
+            build confidence and demonstrate real skills.
+          </p>
+
+          <div class="pill-row">
+            <span class="pill">Practice-first learning</span>
+            <span class="pill">Portfolio outcomes</span>
+            <span class="pill">Daily coaching</span>
           </div>
         </div>
 
+        <div class="panel">
+          <div class="panel-title">Tutor Agent Philosophy</div>
+          <ul class="list">
+            <li>Simple guidance + small steps (reduce overwhelm).</li>
+            <li>Hands-on projects (real datasets, real artifacts).</li>
+            <li>Consistent daily practice with feedback loops.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="cards">
+        <div class="project-card subtle">
+          <div class="card-eyebrow">TUTOR AGENT</div>
+          <div class="card-title">Interactive Tutor Agent Repos</div>
+          <p class="text">
+            Tutor agents are organized as reusable prompts and learning kits, designed so students can independently run them in ChatGPT
+            and build tangible projects.
+          </p>
+          <div class="actions">
+            <!-- KEEPING LINKS INTACT -->
+            <a class="btn ghost" target="_blank" rel="noreferrer"
+               href="https://github.com/Lakshmi-AI-Data/interactive-ai-tutor-agents">GitHub</a>
+          </div>
+        </div>
+
+        <div class="project-card">
+          <div class="card-eyebrow">HOW I SCALE IMPACT</div>
+          <div class="card-title">Reusable learning systems</div>
+          <p class="text">
+            I treat tutor agents as products: structured lesson paths, repeatable exercises, and clear outputs (answers, projects, portfolio links).
+            This makes quality learning scalable even with limited teaching capacity.
+          </p>
+          <div class="hint">
+            Optional: add a short “Student Outcomes” line here later (e.g., # students trained, projects shipped, placement wins).
+          </div>
+        </div>
       </div>
     </div>
   </section>
