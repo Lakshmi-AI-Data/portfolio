@@ -1,0 +1,1 @@
+Portfolio with self-contained FinOps dashboard. Upload index.html, styles.css, script.js, and the entire finops/ folder to the portfolio_refresh branch. The FinOps View dashboard link is now relative (finops/index.html), so it works on any host. The dashboard uses mock telemetry, not live billing data. Review Vercel preview before merging to main.

@@ -1,0 +1,1229 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>FinOps Cost Governance Dashboard (Prototype)</title>
+  <style>
+    :root{
+      --bg:#0b1220;
+      --panel:#0f1a2d;
+      --panel2:#111f36;
+      --border:rgba(255,255,255,.10);
+      --text:#e9eefb;
+      --muted:rgba(233,238,251,.72);
+      --muted2:rgba(233,238,251,.55);
+      --good:#22c55e;
+      --warn:#f59e0b;
+      --bad:#ef4444;
+      --accent:#60a5fa;
+      --chip:#0b1630;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --radius:14px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      background: radial-gradient(1200px 700px at 10% 0%, rgba(96,165,250,.18), transparent 60%),
+                  radial-gradient(900px 500px at 70% 5%, rgba(34,197,94,.12), transparent 55%),
+                  radial-gradient(900px 500px at 30% 95%, rgba(245,158,11,.10), transparent 55%),
+                  var(--bg);
+      color:var(--text);
+    }
+    header{
+      position:sticky; top:0; z-index:5;
+      backdrop-filter: blur(10px);
+      background: rgba(11,18,32,.72);
+      border-bottom: 1px solid var(--border);
+    }
+    .wrap{max-width:1240px; margin:0 auto; padding:16px 18px;}
+    .topbar{
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+    }
+    .title{
+      display:flex; flex-direction:column; gap:4px;
+    }
+    .title h1{
+      margin:0;
+      font-size:16px;
+      letter-spacing:.2px;
+      font-weight:700;
+    }
+    .subtitle{
+      font-size:12px; color:var(--muted2);
+    }
+    .statusline{
+      display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    .pill{
+      font-size:12px;
+      padding:6px 10px;
+      border:1px solid var(--border);
+      background: rgba(17,31,54,.55);
+      border-radius:999px;
+      color:var(--muted);
+      display:inline-flex; gap:8px; align-items:center;
+    }
+    .dot{width:8px;height:8px;border-radius:50%;}
+    .dot.good{background:var(--good)}
+    .dot.warn{background:var(--warn)}
+    .dot.bad{background:var(--bad)}
+    main{
+      max-width:1240px; margin:0 auto; padding:16px 18px 36px;
+      display:grid;
+      grid-template-columns: 310px 1fr;
+      gap:16px;
+      align-items:start;
+    }
+    .panel{
+      background: linear-gradient(180deg, rgba(15,26,45,.92), rgba(15,26,45,.72));
+      border:1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+    .panel h2{
+      margin:0;
+      font-size:13px;
+      letter-spacing:.3px;
+      font-weight:800;
+      text-transform:uppercase;
+      color:rgba(233,238,251,.85);
+    }
+    .panel .hd{
+      padding:14px 14px 10px;
+      border-bottom:1px solid var(--border);
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+    }
+    .panel .bd{ padding:14px; }
+    .filters .group{ margin-bottom:14px; }
+    label{
+      display:block;
+      font-size:12px;
+      color:var(--muted);
+      margin-bottom:6px;
+    }
+    select, input[type="date"], input[type="search"]{
+      width:100%;
+      padding:10px 10px;
+      border-radius:12px;
+      border:1px solid var(--border);
+      background: rgba(9,16,31,.6);
+      color:var(--text);
+      outline:none;
+    }
+    input[type="search"]::placeholder{color:rgba(233,238,251,.35)}
+    .btnrow{display:flex; gap:8px; flex-wrap:wrap;}
+    .btn{
+      border:1px solid var(--border);
+      background: rgba(17,31,54,.55);
+      color:var(--muted);
+      padding:8px 10px;
+      border-radius:12px;
+      font-size:12px;
+      cursor:pointer;
+      user-select:none;
+    }
+    .btn.active{
+      border-color: rgba(96,165,250,.55);
+      color: rgba(233,238,251,.92);
+      background: rgba(96,165,250,.14);
+    }
+    .checks{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px 10px;
+    }
+    .check{
+      display:flex; align-items:center; gap:8px;
+      font-size:12px; color:var(--muted);
+      padding:10px 10px;
+      border:1px solid var(--border);
+      border-radius:12px;
+      background: rgba(9,16,31,.45);
+      cursor:pointer;
+      user-select:none;
+    }
+    .check input{accent-color: var(--accent)}
+    .mutedNote{
+      font-size:11px; color:var(--muted2); line-height:1.35;
+    }
+
+    .content{
+      display:flex; flex-direction:column; gap:16px;
+    }
+    .kpis{
+      display:grid;
+      grid-template-columns: repeat(6, minmax(0,1fr));
+      gap:12px;
+    }
+    .kpi{
+      padding:12px 12px;
+      border-radius: var(--radius);
+      border:1px solid var(--border);
+      background: linear-gradient(180deg, rgba(17,31,54,.70), rgba(17,31,54,.40));
+    }
+    .kpi .k{
+      font-size:11px;
+      color:rgba(233,238,251,.65);
+      text-transform:uppercase;
+      letter-spacing:.35px;
+      margin-bottom:6px;
+      font-weight:800;
+    }
+    .kpi .v{
+      font-size:18px;
+      font-weight:900;
+      letter-spacing:.2px;
+      margin-bottom:6px;
+    }
+    .kpi .s{
+      font-size:12px;
+      color:var(--muted);
+      display:flex; align-items:center; gap:8px;
+    }
+    .badge{
+      font-size:11px;
+      padding:3px 8px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background: rgba(11,18,32,.35);
+      color:rgba(233,238,251,.80);
+    }
+    .badge.good{border-color: rgba(34,197,94,.45); background: rgba(34,197,94,.12)}
+    .badge.warn{border-color: rgba(245,158,11,.45); background: rgba(245,158,11,.12)}
+    .badge.bad{border-color: rgba(239,68,68,.45); background: rgba(239,68,68,.12)}
+    .grid2{display:grid; grid-template-columns: 1fr 1fr; gap:16px;}
+    .chartwrap{
+      height:240px;
+      padding:12px 12px 6px;
+    }
+    .legend{
+      display:flex; gap:10px; flex-wrap:wrap;
+      padding:0 12px 12px;
+      color:var(--muted);
+      font-size:12px;
+    }
+    .legend .key{display:inline-flex; align-items:center; gap:6px;}
+    .key .sw{width:10px;height:10px;border-radius:3px; background: var(--accent);}
+    .tablewrap{overflow:auto;}
+    table{
+      width:100%;
+      border-collapse:separate;
+      border-spacing:0;
+      font-size:12px;
+      min-width:820px;
+    }
+    th, td{
+      padding:10px 10px;
+      border-bottom:1px solid var(--border);
+      vertical-align:middle;
+      color:rgba(233,238,251,.86);
+    }
+    th{
+      position:sticky; top:0;
+      background: rgba(15,26,45,.95);
+      text-transform:uppercase;
+      letter-spacing:.35px;
+      font-size:11px;
+      color:rgba(233,238,251,.70);
+      font-weight:800;
+      z-index:1;
+    }
+    tr:hover td{background: rgba(96,165,250,.05);}
+    .right{text-align:right}
+    .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;}
+    .chip{
+      display:inline-flex; align-items:center; gap:6px;
+      padding:3px 8px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background: rgba(9,16,31,.45);
+      color: rgba(233,238,251,.78);
+      font-size:11px;
+      white-space:nowrap;
+    }
+    .sev{font-weight:900}
+    .sev.good{color:var(--good)}
+    .sev.warn{color:var(--warn)}
+    .sev.bad{color:var(--bad)}
+    .small{font-size:11px; color:var(--muted2)}
+    .footerNote{
+      margin-top:6px;
+      font-size:11px;
+      color:var(--muted2);
+      padding:0 2px;
+      line-height:1.4;
+    }
+    canvas{width:100%; height:100%;}
+    .actions{
+      display:flex; gap:8px; align-items:center;
+    }
+    .linkbtn{
+      font-size:12px;
+      padding:8px 10px;
+      border-radius:12px;
+      border:1px solid var(--border);
+      background: rgba(9,16,31,.45);
+      color:rgba(233,238,251,.85);
+      cursor:pointer;
+    }
+    .linkbtn:hover{border-color: rgba(96,165,250,.45)}
+    @media (max-width: 1100px){
+      main{grid-template-columns: 1fr; }
+      .kpis{grid-template-columns: repeat(3, minmax(0,1fr));}
+      .grid2{grid-template-columns: 1fr;}
+    }
+    @media (max-width: 640px){
+      .kpis{grid-template-columns: repeat(2, minmax(0,1fr));}
+    }
+  </style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="title">
+        <h1>FinOps Cost Governance Dashboard <span class="badge" style="margin-left:8px;">Prototype</span></h1>
+        <div class="subtitle">Executive visibility for cost distribution, anomaly drivers, and tagging governance (mock telemetry, last 7 days)</div>
+      </div>
+      <div class="statusline">
+        <div class="pill"><span class="dot warn"></span><span id="hdrRiskLabel">Active cost risk: Medium</span></div>
+        <div class="pill"><span class="dot"></span><span id="hdrScope">Scope: All clients · All envs</span></div>
+        <div class="pill"><span class="mono" id="hdrWindow">Window: —</span></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- Filters -->
+  <section class="panel filters">
+    <div class="hd">
+      <h2>Filters</h2>
+      <div class="actions">
+        <button class="linkbtn" id="btnReset">Reset</button>
+      </div>
+    </div>
+    <div class="bd">
+      <div class="group">
+        <label>Quick window</label>
+        <div class="btnrow">
+          <button class="btn active" data-window="7d" id="btn7d">Last 7 days</button>
+          <button class="btn" data-window="24h" id="btn24h">Last 24 hours</button>
+          <button class="btn" data-window="60m" id="btn60m">Last 60 minutes</button>
+        </div>
+      </div>
+
+      <div class="group">
+        <label>Date range (optional override)</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <input type="date" id="minDate"/>
+          <input type="date" id="maxDate"/>
+        </div>
+        <div class="mutedNote" style="margin-top:6px;">
+          If you set dates, it overrides the quick window.
+        </div>
+      </div>
+
+      <div class="group">
+        <label>Client</label>
+        <select id="clientSelect"></select>
+      </div>
+
+      <div class="group">
+        <label>Environment</label>
+        <div class="checks" id="envChecks"></div>
+      </div>
+
+      <div class="group">
+        <label>Search (job / component / asset)</label>
+        <input type="search" id="searchBox" placeholder="e.g., promo, pricing, selective, notebook name…"/>
+      </div>
+
+      <div class="group">
+        <label>Governance toggles</label>
+        <div class="checks" style="grid-template-columns:1fr;">
+          <label class="check" style="cursor:pointer;">
+            <input type="checkbox" id="onlyUntagged"/>
+            Show only untagged assets / workloads
+          </label>
+          <label class="check" style="cursor:pointer;">
+            <input type="checkbox" id="onlyAnomalies"/>
+            Show only anomalies (high cost / long / failures)
+          </label>
+        </div>
+      </div>
+
+      <div class="group">
+        <div class="mutedNote">
+          <b>Prototype note:</b> Data is mocked but modeled like platform telemetry (client, env, job, trigger type, status, duration, compute cost, storage size, tags).
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Content -->
+  <section class="content">
+    <!-- KPI row -->
+    <div class="kpis">
+      <div class="kpi">
+        <div class="k">Total Spend (Window)</div>
+        <div class="v" id="kpiTotalSpend">$—</div>
+        <div class="s"><span class="badge" id="kpiSpendBadge">—</span><span id="kpiSpendSub">compute + storage</span></div>
+      </div>
+      <div class="kpi">
+        <div class="k">Compute Spend</div>
+        <div class="v" id="kpiCompute">$—</div>
+        <div class="s"><span class="badge" id="kpiComputeBadge">—</span><span id="kpiComputeSub">jobs & warehouses</span></div>
+      </div>
+      <div class="kpi">
+        <div class="k">Storage Size</div>
+        <div class="v" id="kpiStorage">— TB</div>
+        <div class="s"><span class="badge" id="kpiStorageBadge">—</span><span id="kpiStorageSub">&gt;35 TB threshold</span></div>
+      </div>
+      <div class="kpi">
+        <div class="k">Untagged Cost</div>
+        <div class="v" id="kpiUntagged">$—</div>
+        <div class="s"><span class="badge" id="kpiUntaggedBadge">—</span><span id="kpiUntaggedSub">missing component tag</span></div>
+      </div>
+      <div class="kpi">
+        <div class="k">Failures Cost</div>
+        <div class="v" id="kpiFailures">$—</div>
+        <div class="s"><span class="badge" id="kpiFailuresBadge">—</span><span id="kpiFailuresSub">wasted spend</span></div>
+      </div>
+      <div class="kpi">
+        <div class="k">Active Cost Risk</div>
+        <div class="v" id="kpiRisk">—</div>
+        <div class="s"><span class="badge" id="kpiRiskBadge">—</span><span id="kpiRiskSub">long + fail + untagged</span></div>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="grid2">
+      <div class="panel">
+        <div class="hd">
+          <h2>Daily spend trend</h2>
+          <div class="small" id="trendSub">Last 7 days · compute+storage</div>
+        </div>
+        <div class="chartwrap">
+          <canvas id="trendChart"></canvas>
+        </div>
+        <div class="legend">
+          <span class="key"><span class="sw" style="background:rgba(96,165,250,.9)"></span>Spend (daily total)</span>
+          <span class="key"><span class="sw" style="background:rgba(245,158,11,.9)"></span>Anomaly markers</span>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="hd">
+          <h2>Spend by client</h2>
+          <div class="small" id="clientBarSub">Sorted by total spend</div>
+        </div>
+        <div class="chartwrap">
+          <canvas id="clientBar"></canvas>
+        </div>
+        <div class="legend">
+          <span class="key"><span class="sw" style="background:rgba(34,197,94,.85)"></span>Compute</span></span>
+          <span class="key"><span class="sw" style="background:rgba(96,165,250,.85)"></span>Storage</span></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="panel">
+      <div class="hd">
+        <h2>Top cost drivers & governance issues</h2>
+        <div class="small" id="tableSub">Jobs and assets contributing most to spend and/or policy breaches</div>
+      </div>
+      <div class="bd">
+        <div class="tablewrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Severity</th>
+                <th>Client</th>
+                <th>Env</th>
+                <th>Component Tag</th>
+                <th>Workload</th>
+                <th>Status</th>
+                <th class="right">Duration (min)</th>
+                <th class="right">Cost ($)</th>
+                <th class="right">Storage (TB)</th>
+                <th>Signals</th>
+              </tr>
+            </thead>
+            <tbody id="tbody"></tbody>
+          </table>
+        </div>
+        <div class="footerNote">
+          Signals include: <span class="chip">Long-running</span> <span class="chip">Failure</span>
+          <span class="chip">Untagged</span> <span class="chip">High cost</span> <span class="chip">&gt;35TB</span>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+/** -----------------------------
+ *  Mock telemetry data generator
+ *  -----------------------------
+ *  The goal is “realistic enough” executive telemetry:
+ *  - daily spend by client/env
+ *  - job-level costs + duration + status + tags
+ *  - storage sizes (per client/env asset)
+ */
+
+const ENVIRONMENTS = ["Prod","Preview","QA","Stage","Staging","Dev","DevOps","NPN"];
+const CLIENTS = ["Amazon","7-Eleven","Walmart","Kroger","Home Depot","Ahold","Costsco","Data Platform","(Blank)"];
+const COMPONENTS = [
+  "/promo/analytics_engine/selective",
+  "/promo/modeling",
+  "/price/pipeline",
+  "/common/ingestion",
+  "/common/quality",
+  "/clearance/scoring",
+  "(Missing)"
+];
+const TRIGGERS = ["Scheduled","Manual","API","Backfill"];
+const STATUSES = ["SUCCESS","FAILED","CANCELLED"];
+
+function seededRandom(seed){
+  // simple deterministic RNG
+  let t = seed >>> 0;
+  return function(){
+    t += 0x6D2B79F5;
+    let x = Math.imul(t ^ (t >>> 15), 1 | t);
+    x ^= x + Math.imul(x ^ (x >>> 7), 61 | x);
+    return ((x ^ (x >>> 14)) >>> 0) / 4294967296;
+  }
+}
+
+function fmtMoney(n){
+  const v = Math.round(n * 100) / 100;
+  return v.toLocaleString(undefined,{style:"currency",currency:"USD"});
+}
+function fmtTB(n){
+  const v = Math.round(n * 10) / 10;
+  return v.toLocaleString(undefined,{minimumFractionDigits:1, maximumFractionDigits:1});
+}
+function clamp(n,a,b){ return Math.max(a, Math.min(b,n)); }
+
+function daysBack(date, n){
+  const d = new Date(date);
+  d.setDate(d.getDate() - n);
+  return d;
+}
+function isoDate(d){
+  const x = new Date(d);
+  x.setHours(0,0,0,0);
+  return x.toISOString().slice(0,10);
+}
+function within(d, start, end){
+  const t = new Date(d).getTime();
+  return t >= start.getTime() && t <= end.getTime();
+}
+
+const NOW = new Date();
+NOW.setSeconds(0,0);
+
+// Generate mock records: one record ~= one job run OR one storage asset snapshot
+// We'll represent everything as "records" with type: "job" or "storage".
+function generateMockTelemetry(){
+  const rnd = seededRandom(260214); // fixed seed for stable demo
+  const records = [];
+
+  // Storage assets per client/env (stable-ish over window)
+  CLIENTS.forEach(client=>{
+    ENVIRONMENTS.forEach(env=>{
+      // Not every client has every env
+      if(rnd() < 0.35 && env !== "Prod") return;
+      if(client === "(Blank)" && rnd() < 0.6) return;
+
+      // base storage TB
+      let baseTB = 2 + rnd()*18;
+      if(client === "Amazon") baseTB += 18;
+      if(client === "7-Eleven") baseTB += 10;
+      if(client === "Walmart") baseTB += 7;
+      if(client === "Data Platform") baseTB += 30;
+
+      // occasional >35TB risk
+      if(rnd() < 0.12) baseTB += 25 + rnd()*15;
+
+      // daily snapshots (7d)
+      for(let i=6;i>=0;i--){
+        const day = daysBack(NOW, i);
+        const drift = (rnd()-0.5) * 0.8; // +/- 0.4 TB day-to-day
+        const tb = clamp(baseTB + drift*i, 0.5, 90);
+        const storageCost = tb * (0.18 + rnd()*0.08); // $/TB/day mock
+        records.push({
+          type:"storage",
+          ts: new Date(day.getFullYear(), day.getMonth(), day.getDate(), 2, 0, 0).toISOString(),
+          day: isoDate(day),
+          client, env,
+          asset: `${client.toLowerCase().replace(/\s/g,'_')}_${env.toLowerCase()}_datalake`,
+          component: rnd()<0.18 ? "(Missing)" : (rnd()<0.5 ? "/common/ingestion" : "/common/quality"),
+          storageTB: tb,
+          storageCost: storageCost,
+          computeCost: 0,
+          durationMin: 0,
+          status: "N/A",
+          trigger: "N/A",
+          workload: "Storage Snapshot"
+        });
+      }
+    })
+  });
+
+  // Job runs per day
+  const jobNames = [
+    "pos_aggregation_daily",
+    "promo_calendar_refresh",
+    "pricing_zone_rollup",
+    "dq_validation_suite",
+    "semantic_mapping_build",
+    "rollup_to_priceline",
+    "feature_store_materialize",
+    "cost_tags_audit"
+  ];
+
+  for(let i=6;i>=0;i--){
+    const day = daysBack(NOW, i);
+    const dayISO = isoDate(day);
+
+    CLIENTS.forEach(client=>{
+      ENVIRONMENTS.forEach(env=>{
+        if(rnd() < 0.45 && env !== "Prod") return;
+        if(client === "(Blank)" && rnd() < 0.7) return;
+
+        // number of jobs
+        let jobCount = 3 + Math.floor(rnd()*8);
+        if(env === "Prod") jobCount += 3;
+        if(client === "Amazon") jobCount += 3;
+        if(client === "Data Platform") jobCount += 5;
+
+        for(let j=0;j<jobCount;j++){
+          const name = jobNames[Math.floor(rnd()*jobNames.length)];
+          const compPick = COMPONENTS[Math.floor(rnd()*COMPONENTS.length)];
+          const component = (rnd()<0.16) ? "(Missing)" : compPick;
+
+          const trigger = TRIGGERS[Math.floor(rnd()*TRIGGERS.length)];
+          let status = "SUCCESS";
+          if(rnd() < 0.09) status = "FAILED";
+          if(rnd() < 0.03) status = "CANCELLED";
+
+          // duration + cost
+          let durationMin = 4 + rnd()*28; // 4-32
+          // Inject long-running outliers
+          if(rnd() < 0.10) durationMin += 30 + rnd()*60; // +30-90
+          // cost base
+          let computeCost = (durationMin * (0.55 + rnd()*0.9)); // $/min mock
+          // Make some jobs inefficient/high cost
+          if(rnd() < 0.08) computeCost *= 2.2;
+
+          // failures waste extra
+          if(status === "FAILED") computeCost *= 1.15;
+
+          // occasionally very high costs
+          if(rnd() < 0.05) computeCost += 120 + rnd()*220;
+
+          const hour = Math.floor(rnd()*23);
+          const minute = Math.floor(rnd()*59);
+
+          records.push({
+            type:"job",
+            ts: new Date(day.getFullYear(), day.getMonth(), day.getDate(), hour, minute, 0).toISOString(),
+            day: dayISO,
+            client, env,
+            component,
+            workload: `${name}`,
+            jKrogerd: `${client.slice(0,3)}-${env.slice(0,2)}-${dayISO}-${j}`,
+            trigger,
+            status,
+            durationMin: Math.round(durationMin*10)/10,
+            computeCost: Math.round(computeCost*100)/100,
+            storageTB: 0,
+            storageCost: 0,
+            asset: ""
+          });
+        }
+      });
+    });
+  }
+
+  return records;
+}
+
+const TELEMETRY = generateMockTelemetry();
+
+/** -----------------------------
+ *  UI state + controls
+ *  ----------------------------- */
+const state = {
+  window: "7d",      // 7d | 24h | 60m
+  minDate: null,     // YYYY-MM-DD
+  maxDate: null,     // YYYY-MM-DD
+  client: "All",
+  envs: new Set(ENVIRONMENTS),
+  search: "",
+  onlyUntagged: false,
+  onlyAnomalies: false
+};
+
+const el = {
+  clientSelect: document.getElementById("clientSelect"),
+  envChecks: document.getElementById("envChecks"),
+  searchBox: document.getElementById("searchBox"),
+  onlyUntagged: document.getElementById("onlyUntagged"),
+  onlyAnomalies: document.getElementById("onlyAnomalies"),
+  minDate: document.getElementById("minDate"),
+  maxDate: document.getElementById("maxDate"),
+  btn7d: document.getElementById("btn7d"),
+  btn24h: document.getElementById("btn24h"),
+  btn60m: document.getElementById("btn60m"),
+  btnReset: document.getElementById("btnReset"),
+  tbody: document.getElementById("tbody"),
+  hdrWindow: document.getElementById("hdrWindow"),
+  hdrScope: document.getElementById("hdrScope"),
+  hdrRiskLabel: document.getElementById("hdrRiskLabel"),
+  // KPIs
+  kpiTotalSpend: document.getElementById("kpiTotalSpend"),
+  kpiCompute: document.getElementById("kpiCompute"),
+  kpiStorage: document.getElementById("kpiStorage"),
+  kpiUntagged: document.getElementById("kpiUntagged"),
+  kpiFailures: document.getElementById("kpiFailures"),
+  kpiRisk: document.getElementById("kpiRisk"),
+  kpiSpendBadge: document.getElementById("kpiSpendBadge"),
+  kpiComputeBadge: document.getElementById("kpiComputeBadge"),
+  kpiStorageBadge: document.getElementById("kpiStorageBadge"),
+  kpiUntaggedBadge: document.getElementById("kpiUntaggedBadge"),
+  kpiFailuresBadge: document.getElementById("kpiFailuresBadge"),
+  kpiRiskBadge: document.getElementById("kpiRiskBadge"),
+  trendSub: document.getElementById("trendSub")
+};
+
+function setActiveWindow(w){
+  state.window = w;
+  [el.btn7d, el.btn24h, el.btn60m].forEach(b=>b.classList.remove("active"));
+  if(w==="7d") el.btn7d.classList.add("active");
+  if(w==="24h") el.btn24h.classList.add("active");
+  if(w==="60m") el.btn60m.classList.add("active");
+}
+
+function initControls(){
+  // Client dropdown
+  el.clientSelect.innerHTML = "";
+  const optAll = document.createElement("option");
+  optAll.value = "All"; optAll.textContent = "All clients";
+  el.clientSelect.appendChild(optAll);
+  CLIENTS.filter(c=>c!=="(Blank)").forEach(c=>{
+    const o=document.createElement("option");
+    o.value=c; o.textContent=c;
+    el.clientSelect.appendChild(o);
+  });
+  const ob=document.createElement("option");
+  ob.value="(Blank)"; ob.textContent="(Blank)";
+  el.clientSelect.appendChild(ob);
+
+  // Env checks
+  el.envChecks.innerHTML = "";
+  ENVIRONMENTS.forEach(env=>{
+    const lbl = document.createElement("label");
+    lbl.className="check";
+    lbl.innerHTML = `<input type="checkbox" checked data-env="${env}"/> ${env}`;
+    el.envChecks.appendChild(lbl);
+  });
+
+  // Handlers
+  el.clientSelect.addEventListener("change", ()=>{
+    state.client = el.clientSelect.value;
+    render();
+  });
+  el.envChecks.addEventListener("change", (e)=>{
+    const t=e.target;
+    if(t && t.matches("input[type=checkbox][data-env]")){
+      const env = t.getAttribute("data-env");
+      if(t.checked) state.envs.add(env); else state.envs.delete(env);
+      render();
+    }
+  });
+  el.searchBox.addEventListener("input", ()=>{
+    state.search = el.searchBox.value.trim().toLowerCase();
+    render();
+  });
+  el.onlyUntagged.addEventListener("change", ()=>{
+    state.onlyUntagged = el.onlyUntagged.checked;
+    render();
+  });
+  el.onlyAnomalies.addEventListener("change", ()=>{
+    state.onlyAnomalies = el.onlyAnomalies.checked;
+    render();
+  });
+
+  el.minDate.addEventListener("change", ()=>{
+    state.minDate = el.minDate.value || null;
+    render();
+  });
+  el.maxDate.addEventListener("change", ()=>{
+    state.maxDate = el.maxDate.value || null;
+    render();
+  });
+
+  el.btn7d.addEventListener("click", ()=>{ setActiveWindow("7d"); render(); });
+  el.btn24h.addEventListener("click", ()=>{ setActiveWindow("24h"); render(); });
+  el.btn60m.addEventListener("click", ()=>{ setActiveWindow("60m"); render(); });
+
+  el.btnReset.addEventListener("click", ()=>{
+    state.window = "7d";
+    state.minDate = null;
+    state.maxDate = null;
+    state.client = "All";
+    state.envs = new Set(ENVIRONMENTS);
+    state.search = "";
+    state.onlyUntagged = false;
+    state.onlyAnomalies = false;
+
+    el.searchBox.value="";
+    el.onlyUntagged.checked=false;
+    el.onlyAnomalies.checked=false;
+    el.minDate.value="";
+    el.maxDate.value="";
+    el.clientSelect.value="All";
+    [...el.envChecks.querySelectorAll("input[type=checkbox][data-env]")].forEach(cb=>cb.checked=true);
+    setActiveWindow("7d");
+    render();
+  });
+
+  // Pre-fill date inputs with last 7 days (for convenience but not set as override)
+  const d0 = daysBack(NOW, 6);
+  el.hdrWindow.textContent = `Window: ${isoDate(d0)} → ${isoDate(NOW)}`;
+}
+
+function computeWindowRange(){
+  // If explicit dates provided, use them
+  if(state.minDate && state.maxDate){
+    const s = new Date(state.minDate + "T00:00:00");
+    const e = new Date(state.maxDate + "T23:59:59");
+    return {start:s, end:e, label:`Window: ${state.minDate} → ${state.maxDate}`};
+  }
+
+  // Else quick windows from NOW
+  let start, end;
+  end = new Date(NOW);
+  if(state.window === "7d"){
+    start = daysBack(end, 6);
+    start.setHours(0,0,0,0);
+    end.setHours(23,59,59,999);
+    return {start, end, label:`Window: ${isoDate(start)} → ${isoDate(end)}`};
+  }
+  if(state.window === "24h"){
+    start = new Date(end.getTime() - 24*60*60*1000);
+    return {start, end, label:`Window: last 24h`};
+  }
+  // 60m
+  start = new Date(end.getTime() - 60*60*1000);
+  return {start, end, label:`Window: last 60m`};
+}
+
+function isUntagged(rec){
+  return (rec.component === "(Missing)" || rec.component === "" || rec.component == null);
+}
+function isLongRunning(rec){
+  return rec.type === "job" && rec.durationMin > 20;
+}
+function isHighCost(rec){
+  const c = rec.computeCost + rec.storageCost;
+  return c > 180;
+}
+function isFailure(rec){
+  return rec.type === "job" && rec.status === "FAILED";
+}
+function isStorageRisk(rec){
+  return rec.type === "storage" && rec.storageTB > 35;
+}
+function isAnomaly(rec){
+  return isLongRunning(rec) || isHighCost(rec) || isFailure(rec) || isStorageRisk(rec) || isUntagged(rec);
+}
+
+function filterTelemetry(){
+  const {start, end} = computeWindowRange();
+
+  return TELEMETRY.filter(rec=>{
+    const t = new Date(rec.ts);
+    if(!(t >= start && t <= end)) return false;
+
+    if(state.client !== "All" && rec.client !== state.client) return false;
+    if(!state.envs.has(rec.env)) return false;
+
+    if(state.search){
+      const hay = `${rec.client} ${rec.env} ${rec.component} ${rec.workload} ${rec.asset} ${rec.jKrogerd}`.toLowerCase();
+      if(!hay.includes(state.search)) return false;
+    }
+
+    if(state.onlyUntagged && !isUntagged(rec)) return false;
+    if(state.onlyAnomalies && !isAnomaly(rec)) return false;
+
+    return true;
+  });
+}
+
+function severityOf(rec){
+  // Simple severity logic for exec prototype
+  let score = 0;
+  if(isUntagged(rec)) score += 2;
+  if(isFailure(rec)) score += 3;
+  if(isLongRunning(rec)) score += 2;
+  if(isHighCost(rec)) score += 3;
+  if(isStorageRisk(rec)) score += 2;
+
+  if(score >= 6) return {label:"High", cls:"bad"};
+  if(score >= 3) return {label:"Medium", cls:"warn"};
+  return {label:"Low", cls:"good"};
+}
+
+function badgeFor(value, thresholds){
+  // thresholds: {goodMax, warnMax} where above warnMax = bad
+  if(value <= thresholds.goodMax) return {cls:"good", label:"Healthy"};
+  if(value <= thresholds.warnMax) return {cls:"warn", label:"Watch"};
+  return {cls:"bad", label:"Action"};
+}
+
+function renderKPIs(records){
+  const jobs = records.filter(r=>r.type==="job");
+  const storage = records.filter(r=>r.type==="storage");
+
+  const computeSpend = jobs.reduce((a,r)=>a+r.computeCost,0);
+  const storageSpend = storage.reduce((a,r)=>a+r.storageCost,0);
+  const totalSpend = computeSpend + storageSpend;
+
+  // storage size: use max TB per client/env per day snapshot then sum latest day in window
+  let latestDay = null;
+  storage.forEach(r=>{
+    if(!latestDay || r.day > latestDay) latestDay = r.day;
+  });
+  const latestStorage = storage.filter(r=>r.day === latestDay);
+  const storageTB = latestStorage.reduce((a,r)=>a+r.storageTB,0);
+
+  const untaggedCost = records.filter(isUntagged).reduce((a,r)=>a+(r.computeCost+r.storageCost),0);
+  const failuresCost = jobs.filter(r=>r.status==="FAILED").reduce((a,r)=>a+r.computeCost,0);
+
+  const longCost = jobs.filter(isLongRunning).reduce((a,r)=>a+r.computeCost,0);
+
+  // Active cost risk = weighted blend (prototype)
+  const riskScore = (untaggedCost*0.35) + (failuresCost*0.40) + (longCost*0.25);
+
+  // KPI values
+  el.kpiTotalSpend.textContent = fmtMoney(totalSpend);
+  el.kpiCompute.textContent = fmtMoney(computeSpend);
+  el.kpiStorage.textContent = `${fmtTB(storageTB)} TB`;
+  el.kpiUntagged.textContent = fmtMoney(untaggedCost);
+  el.kpiFailures.textContent = fmtMoney(failuresCost);
+
+  // Risk label
+  let riskLabel = "Low";
+  let riskCls = "good";
+  if(riskScore > 1500){ riskLabel="High"; riskCls="bad"; }
+  else if(riskScore > 650){ riskLabel="Medium"; riskCls="warn"; }
+
+  el.kpiRisk.textContent = riskLabel;
+
+  // Badges
+  const spendB = badgeFor(totalSpend, {goodMax: 12000, warnMax: 24000});
+  const compB  = badgeFor(computeSpend, {goodMax: 7000, warnMax: 15000});
+  const storB  = badgeFor(storageTB, {goodMax: 35, warnMax: 55});
+  const untB   = badgeFor(untaggedCost, {goodMax: 600, warnMax: 1500});
+  const failB  = badgeFor(failuresCost, {goodMax: 350, warnMax: 900});
+
+  setBadge(el.kpiSpendBadge, spendB);
+  setBadge(el.kpiComputeBadge, compB);
+  setBadge(el.kpiStorageBadge, storB);
+  setBadge(el.kpiUntaggedBadge, untB);
+  setBadge(el.kpiFailuresBadge, failB);
+  setBadge(el.kpiRiskBadge, {cls:riskCls, label:`${riskLabel} risk`});
+
+  // Header scope + risk
+  const clientLbl = (state.client==="All") ? "All clients" : state.client;
+  const envLbl = (state.envs.size===ENVIRONMENTS.length) ? "All envs" : `${state.envs.size} envs`;
+  el.hdrScope.textContent = `Scope: ${clientLbl} · ${envLbl}`;
+  el.hdrRiskLabel.textContent = `Active cost risk: ${riskLabel}`;
+  // Update dot class
+  const pillDot = document.querySelector(".statusline .pill .dot");
+  pillDot.className = "dot " + riskCls;
+
+  // Window label
+  const {label} = computeWindowRange();
+  el.hdrWindow.textContent = label;
+  el.trendSub.textContent = label.replace("Window: ","") + " · compute+storage";
+}
+
+function setBadge(node, b){
+  node.classList.remove("good","warn","bad");
+  node.classList.add(b.cls);
+  node.textContent = b.label;
+}
+
+/** -----------------------------
+ *  Charts (vanilla canvas)
+ *  ----------------------------- */
+function drawTrendChart(records){
+  const canvas = document.getElementById("trendChart");
+  const ctx = canvas.getContext("2d");
+  const dpr = window.devicePixelRatio || 1;
+  const w = canvas.clientWidth;
+  const h = canvas.clientHeight;
+  canvas.width = Math.floor(w*dpr);
+  canvas.height = Math.floor(h*dpr);
+  ctx.scale(dpr,dpr);
+
+  // Build daily totals (works best for 7d; still renders for other windows)
+  const totals = {};
+  const anomaliesByDay = {};
+  records.forEach(r=>{
+    const day = r.day || isoDate(r.ts);
+    totals[day] = (totals[day]||0) + (r.computeCost + r.storageCost);
+    if(isAnomaly(r)){
+      anomaliesByDay[day] = (anomaliesByDay[day]||0) + 1;
+    }
+  });
+  const days = Object.keys(totals).sort();
+  if(days.length === 0){
+    ctx.clearRect(0,0,w,h);
+    ctx.fillStyle = "rgba(233,238,251,.65)";
+    ctx.font = "12px system-ui";
+    ctx.fillText("No data for selected filters.", 10, 20);
+    return;
+  }
+  const values = days.map(d=>totals[d]);
+  const maxV = Math.max(...values, 1);
+
+  // padding
+  const padL=34, padR=10, padT=12, padB=26;
+  const innerW = w - padL - padR;
+  const innerH = h - padT - padB;
+
+  ctx.clearRect(0,0,w,h);
+
+  // grid lines
+  ctx.strokeStyle = "rgba(255,255,255,.07)";
+  ctx.lineWidth = 1;
+  for(let i=0;i<=4;i++){
+    const y = padT + (innerH*(i/4));
+    ctx.beginPath(); ctx.moveTo(padL,y); ctx.lineTo(padL+innerW,y); ctx.stroke();
+  }
+
+  // y labels
+  ctx.fillStyle = "rgba(233,238,251,.55)";
+  ctx.font = "11px system-ui";
+  for(let i=0;i<=4;i++){
+    const val = maxV*(1 - i/4);
+    const y = padT + (innerH*(i/4));
+    ctx.fillText("$"+Math.round(val).toLocaleString(), 6, y+4);
+  }
+
+  // line
+  const pts = days.map((d, idx)=>{
+    const x = padL + innerW*(idx/(Math.max(days.length-1,1)));
+    const y = padT + innerH*(1 - (totals[d]/maxV));
+    return {d,x,y,v:totals[d],a:anomaliesByDay[d]||0};
+  });
+
+  // stroke path
+  ctx.strokeStyle = "rgba(96,165,250,.9)";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  pts.forEach((p,i)=>{
+    if(i===0) ctx.moveTo(p.x,p.y);
+    else ctx.lineTo(p.x,p.y);
+  });
+  ctx.stroke();
+
+  // points + anomaly markers
+  pts.forEach(p=>{
+    // point
+    ctx.fillStyle = "rgba(96,165,250,.95)";
+    ctx.beginPath(); ctx.arc(p.x,p.y,3,0,Math.PI*2); ctx.fill();
+
+    // anomaly marker (small triangle) if anomaly count > threshold
+    if(p.a >= 12){
+      ctx.fillStyle = "rgba(245,158,11,.95)";
+      ctx.beginPath();
+      ctx.moveTo(p.x, p.y-10);
+      ctx.lineTo(p.x-6, p.y-0);
+      ctx.lineTo(p.x+6, p.y-0);
+      ctx.closePath();
+      ctx.fill();
+    }
+  });
+
+  // x labels
+  ctx.fillStyle = "rgba(233,238,251,.55)";
+  ctx.font = "11px system-ui";
+  const showEvery = Math.ceil(days.length/6);
+  days.forEach((d, i)=>{
+    if(i % showEvery !== 0 && i !== days.length-1) return;
+    const x = padL + innerW*(i/(Math.max(days.length-1,1)));
+    ctx.fillText(d.slice(5), x-10, padT+innerH+18); // MM-DD
+  });
+}
+
+function drawClientBar(records){
+  const canvas = document.getElementById("clientBar");
+  const ctx = canvas.getContext("2d");
+  const dpr = window.devicePixelRatio || 1;
+  const w = canvas.clientWidth;
+  const h = canvas.clientHeight;
+  canvas.width = Math.floor(w*dpr);
+  canvas.height = Math.floor(h*dpr);
+  ctx.scale(dpr,dpr);
+
+  // Aggregate compute and storage by client
+  const map = {};
+  records.forEach(r=>{
+    if(!map[r.client]) map[r.client]={compute:0, storage:0};
+    map[r.client].compute += r.computeCost;
+    map[r.client].storage += r.storageCost;
+  });
+  const clients = Object.keys(map).filter(c=>c!=="(Blank)").sort((a,b)=>{
+    const ta = map[a].compute+map[a].storage;
+    const tb = map[b].compute+map[b].storage;
+    return tb-ta;
+  }).slice(0,7);
+
+  if(clients.length === 0){
+    ctx.clearRect(0,0,w,h);
+    ctx.fillStyle = "rgba(233,238,251,.65)";
+    ctx.font = "12px system-ui";
+    ctx.fillText("No data for selected filters.", 10, 20);
+    return;
+  }
+
+  const totals = clients.map(c=>map[c].compute+map[c].storage);
+  const maxV = Math.max(...totals, 1);
+
+  const padL=110, padR=12, padT=12, padB=18;
+  const innerW = w - padL - padR;
+  const innerH = h - padT - padB;
+
+  ctx.clearRect(0,0,w,h);
+
+  const barH = innerH / clients.length * 0.62;
+  const gap = innerH / clients.length * 0.38;
+
+  clients.forEach((c, i)=>{
+    const y = padT + i*(barH+gap) + gap*0.5;
+    const computeW = innerW * (map[c].compute / maxV);
+    const storageW = innerW * (map[c].storage / maxV);
+
+    // labels
+    ctx.fillStyle="rgba(233,238,251,.75)";
+    ctx.font="12px system-ui";
+    ctx.fillText(c, 10, y + barH*0.75);
+
+    // compute segment
+    ctx.fillStyle="rgba(34,197,94,.85)";
+    ctx.fillRect(padL, y, computeW, barH);
+
+    // storage segment (stacked)
+    ctx.fillStyle="rgba(96,165,250,.85)";
+    ctx.fillRect(padL + computeW, y, storageW, barH);
+
+    // value
+    const total = map[c].compute + map[c].storage;
+    ctx.fillStyle="rgba(233,238,251,.62)";
+    ctx.font="11px system-ui";
+    ctx.fillText(fmtMoney(total), padL + computeW + storageW + 6, y + barH*0.75);
+  });
+
+  // axis line
+  ctx.strokeStyle="rgba(255,255,255,.07)";
+  ctx.beginPath(); ctx.moveTo(padL, padT); ctx.lineTo(padL, padT+innerH); ctx.stroke();
+}
+
+/** -----------------------------
+ *  Table rendering
+ *  ----------------------------- */
+function renderTable(records){
+  // Rank job records and storage snapshots by "impact"
+  const scored = records
+    .filter(r=>r.type==="job" || r.type==="storage")
+    .map(r=>{
+      const cost = r.computeCost + r.storageCost;
+      let impact = cost;
+      if(isFailure(r)) impact += 120;
+      if(isLongRunning(r)) impact += 60;
+      if(isUntagged(r)) impact += 70;
+      if(isStorageRisk(r)) impact += 80;
+      if(cost > 200) impact += 40;
+      return {r, cost, impact};
+    })
+    .sort((a,b)=>b.impact-a.impact)
+    .slice(0, 18);
+
+  el.tbody.innerHTML = "";
+  scored.forEach(({r,cost})=>{
+    const sev = severityOf(r);
+    const signals = [];
+    if(isLongRunning(r)) signals.push("Long-running");
+    if(isFailure(r)) signals.push("Failure");
+    if(isUntagged(r)) signals.push("Untagged");
+    if(isHighCost(r)) signals.push("High cost");
+    if(isStorageRisk(r)) signals.push(">35TB");
+
+    const comp = (r.component && r.component !== "N/A") ? r.component : "—";
+    const workload = (r.type==="storage") ? r.asset : r.workload;
+    const status = (r.type==="storage") ? "—" : r.status;
+    const duration = (r.type==="storage") ? "—" : r.durationMin.toFixed(1);
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td class="sev ${sev.cls}">${sev.label}</td>
+      <td>${r.client}</td>
+      <td><span class="chip">${r.env}</span></td>
+      <td><span class="chip">${comp}</span></td>
+      <td class="mono">${workload}</td>
+      <td><span class="chip">${status}</span></td>
+      <td class="right mono">${duration}</td>
+      <td class="right mono">${fmtMoney(cost)}</td>
+      <td class="right mono">${r.type==="storage" ? fmtTB(r.storageTB) : "—"}</td>
+      <td>${signals.map(s=>`<span class="chip">${s}</span>`).join(" ") || "—"}</td>
+    `;
+    el.tbody.appendChild(tr);
+  });
+
+  // Table subtitle
+  const aCount = records.filter(isAnomaly).length;
+  const jCount = records.filter(r=>r.type==="job").length;
+  const sCount = records.filter(r=>r.type==="storage").length;
+  document.getElementById("tableSub").textContent =
+    `${jCount} jobs · ${sCount} storage snapshots · ${aCount} anomalies (filtered scope)`;
+}
+
+/** -----------------------------
+ *  Main render
+ *  ----------------------------- */
+function render(){
+  const records = filterTelemetry();
+
+  // Update KPIs + header
+  renderKPIs(records);
+
+  // Charts
+  drawTrendChart(records);
+  drawClientBar(records);
+
+  // Table
+  renderTable(records);
+}
+
+window.addEventListener("resize", ()=>{
+  // re-draw charts on resize
+  render();
+});
+
+initControls();
+render();
+</script>
+</body>
+</html>
