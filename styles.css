@@ -14,3 +14,25 @@
 .munnetra-footer{display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:18px;margin-top:24px;font-size:13px;color:var(--muted)}
 .munnetra-footer a{font-weight:700;text-decoration:none}
 @media(max-width:760px){.munnetra-panel{padding:21px}.munnetra-grid{grid-template-columns:1fr}.munnetra-footer{align-items:flex-start;flex-direction:column}}
+
+
+/* Subtle homepage link to the educational nonprofit section */
+.impact-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0 0 1.5rem;
+  padding: 0.55rem 0.85rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--accent);
+  background: #fff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+.impact-link:hover {
+  border-color: var(--accent);
+  background: var(--soft);
+}
